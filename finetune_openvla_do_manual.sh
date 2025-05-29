@@ -3,10 +3,12 @@
 #SBATCH --output=logs/openvla-finetune-%j.out
 #SBATCH --error=logs/openvla-finetune-%j.err
 #SBATCH --partition=cscc-gpu-p
+#SBATCH --qos=cscc-gpu-qos        
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=48:00:00
+
 
 source ~/.bashrc
 conda activate openvla
@@ -28,4 +30,4 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --wandb_entity mim7995-mbzuai \
   --wandb_project openvla-do_manual
 
-# launch with sbatch finetune_openvla_libero.sh
+# launch with sbatch finetune_openvla_do_manual.sh

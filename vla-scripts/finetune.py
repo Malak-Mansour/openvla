@@ -32,16 +32,22 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --image_aug True \
   --save_steps 500
 
+
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --vla_path "openvla/openvla-7b" \
   --data_root_dir /l/users/malak.mansour/Datasets/do_manual/rlds \
   --dataset_name do_manual \
   --run_root_dir /l/users/malak.mansour/OpenVLA/runs/do_manual \
   --adapter_tmp_dir /l/users/malak.mansour/OpenVLA/adapters/tmp_do_manual \
-  --lora_rank 32 --batch_size 8 --grad_accumulation_steps 2 --learning_rate 5e-4 \
-  --image_aug True --save_steps 500 \
-  --wandb_entity mim7995-mbzuai --wandb_project openvla-do_manual
-
+  --lora_rank 32 \
+  --batch_size 8 \
+  --grad_accumulation_steps 2 \
+  --learning_rate 5e-4 \
+  --image_aug True \
+  --save_steps 500 \
+  --wandb_entity mim7995-mbzuai \
+  --wandb_project openvla-do_manual
+  
                                     """
 
 import os
