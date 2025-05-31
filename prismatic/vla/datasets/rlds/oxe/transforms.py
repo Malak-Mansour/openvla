@@ -841,21 +841,52 @@ def libero_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     return trajectory
 
 
-def do_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
-    # gripper action is in -1 (open)...1 (close) --> clip to 0...1, flip --> +1 = open, 0 = close
-    gripper_action = trajectory["action"][:, -1:]
-    gripper_action = invert_gripper_actions(tf.clip_by_value(gripper_action, 0, 1))
+# absolute action and state=ee+gripper
+# def do_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+#     # gripper action is in -1 (open)...1 (close) --> clip to 0...1, flip --> +1 = open, 0 = close
+#     gripper_action = trajectory["action"][:, -1:]
+#     gripper_action = invert_gripper_actions(tf.clip_by_value(gripper_action, 0, 1))
 
-    trajectory["action"] = tf.concat(
-        [
-            trajectory["action"][:, :6],
-            gripper_action,
-        ],
-        axis=1,
-    )
-    trajectory["observation"]["EEF_state"] = trajectory["observation"]["ee_states"],
-    trajectory["observation"]["gripper_state"] = trajectory["observation"]["gripper_states"],
+#     trajectory["action"] = tf.concat(
+#         [
+#             trajectory["action"][:, :6],
+#             gripper_action,
+#         ],
+#         axis=1,
+#     )
+#     trajectory["observation"]["EEF_state"] = trajectory["observation"]["ee_states"],
+#     trajectory["observation"]["gripper_state"] = trajectory["observation"]["gripper_states"],
+#     return trajectory
+
+def do_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+    # Combine ee_states and gripper_states into full state
+    ee = trajectory["observation"]["ee_states"]             # shape (T, 6)
+    gripper = trajectory["observation"]["gripper_states"]   # shape (T, 1)
+    state = tf.concat([ee, gripper], axis=1)                # shape (T, 7)
+
+    # Compute delta action: state[t+1] - state[t]
+    state_t = tf.slice(state, [0, 0], [tf.shape(state)[0] - 1, -1])   # state[:-1]
+    state_t1 = tf.slice(state, [1, 0], [tf.shape(state)[0] - 1, -1])  # state[1:]
+    delta_action = state_t1 - state_t
+
+    # Pad final step with zeros
+    last_zero = tf.zeros((1, 7), dtype=delta_action.dtype)
+    delta_action = tf.concat([delta_action, last_zero], axis=0)
+
+    # DEBUG PRINTING (works in eager mode or if wrapped in tf.print)
+    # tf.print("=== STATE ===", state, summarize=-1)
+    # tf.print("=== STATE[t] ===", state_t, summarize=-1)
+    # tf.print("=== STATE[t+1] ===", state_t1, summarize=-1)
+    # tf.print("=== DELTA ACTION ===", delta_action, summarize=-1)
+
+    # Update trajectory
+    trajectory["action"] = delta_action
+    trajectory["observation"]["EEF_state"] = ee
+    trajectory["observation"]["gripper_state"] = gripper
+
     return trajectory
+
+
 
 
 # === Registry ===
