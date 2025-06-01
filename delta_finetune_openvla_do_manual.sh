@@ -37,5 +37,5 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 
 '''
 launch with 
-sbatch deltafinetune_openvla_do_manual.sh
+        sbatch deltafinetune_openvla_do_manual.sh
 '''
