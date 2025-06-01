@@ -858,7 +858,7 @@ def libero_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
 #     trajectory["observation"]["gripper_state"] = trajectory["observation"]["gripper_states"],
 #     return trajectory
 
-def do_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+def do_dataset_transform_delta(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     # Combine ee_states and gripper_states into full state
     ee = trajectory["observation"]["ee_states"]             # shape (T, 6)
     gripper = trajectory["observation"]["gripper_states"]   # shape (T, 1)
@@ -887,6 +887,36 @@ def do_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     return trajectory
 
 
+def do_dataset_transform_teleop(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+    # Combine ee_states and gripper_states into full state
+
+    # Update trajectory
+    trajectory["action"] = trajectory["teleop_action"]  # shape (T, 7)
+    trajectory["observation"]["EEF_state"] = trajectory["observation"]["ee_states"]             # shape (T, 6)
+    trajectory["observation"]["gripper_state"] = trajectory["observation"]["gripper_states"]   # shape (T, 1)
+
+    return trajectory
+
+
+def do_dataset_transform_next(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+    # Combine ee_states and gripper_states into full state
+    ee = trajectory["observation"]["ee_states"]             # shape (T, 6)
+    gripper = trajectory["observation"]["gripper_states"]   # shape (T, 1)
+    state = tf.concat([ee, gripper], axis=1)                # shape (T, 7)
+
+    # Compute next action: state[t+1] 
+    next_action = tf.slice(state, [1, 0], [tf.shape(state)[0] - 1, -1])  # state[1:]
+
+    # Pad final step with zeros
+    last_zero = tf.zeros((1, 7), dtype=next_action.dtype)
+    next_action = tf.concat([next_action, last_zero], axis=0)
+
+    # Update trajectory
+    trajectory["action"] = next_action
+    trajectory["observation"]["EEF_state"] = ee
+    trajectory["observation"]["gripper_state"] = gripper
+
+    return trajectory
 
 
 # === Registry ===
@@ -967,5 +997,7 @@ OXE_STANDARDIZATION_TRANSFORMS = {
     "libero_object_no_noops": libero_dataset_transform,
     "libero_goal_no_noops": libero_dataset_transform,
     "libero_10_no_noops": libero_dataset_transform,
-    "do_manual": do_dataset_transform,
+    "do_manual_delta": do_dataset_transform_delta,
+    "do_manual_teleop": do_dataset_transform_teleop,
+    "do_manual_next": do_dataset_transform_next,
 }
