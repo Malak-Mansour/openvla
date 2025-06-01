@@ -116,7 +116,8 @@ class FinetuneConfig:
 
     # Fine-tuning Parameters
     batch_size: int = 16                                            # Fine-tuning batch size
-    max_steps: int = 200_000                                        # Max number of fine-tuning steps
+    # max_steps: int = 200_000                                        # Max number of fine-tuning steps
+    max_steps: int = 10_000 # for do_manual
     save_steps: int = 5000                                          # Interval for checkpoint saving
     learning_rate: float = 5e-4                                     # Fine-tuning learning rate
     grad_accumulation_steps: int = 1                                # Gradient accumulation steps
