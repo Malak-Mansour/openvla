@@ -11,8 +11,8 @@
 
 
 source ~/.bashrc
-conda activate openvla
 cd ~/Downloads/ICL/openvla
+conda activate openvla
 
 
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
@@ -20,8 +20,8 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --data_root_dir /l/users/malak.mansour/Datasets/do_manual/rlds \
   
   # --dataset_name do_manual_delta \
-  --dataset_name do_manual_teleop \
-  # --dataset_name do_manual_next \
+  # --dataset_name do_manual_teleop \
+  --dataset_name do_manual_next \
 
   --run_root_dir /l/users/malak.mansour/OpenVLA/runs/do_manual \
   --adapter_tmp_dir /l/users/malak.mansour/OpenVLA/adapters/tmp_do_manual \
@@ -34,6 +34,8 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --wandb_entity mim7995-mbzuai \
   --wandb_project openvla-do_manual
 
-# do_manual_next
 
-# launch with sbatch finetune_openvla_do_manual.sh
+'''
+launch with 
+sbatch next_finetune_openvla_do_manual.sh
+'''
