@@ -891,7 +891,7 @@ def do_dataset_transform_teleop(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     # Combine ee_states and gripper_states into full state
 
     # Update trajectory
-    trajectory["action"] = trajectory["teleop_action"]  # shape (T, 7)
+    trajectory["action"] = trajectory["teleop_actions"]  # shape (T, 7)
     trajectory["observation"]["EEF_state"] = trajectory["observation"]["ee_states"]             # shape (T, 6)
     trajectory["observation"]["gripper_state"] = trajectory["observation"]["gripper_states"]   # shape (T, 1)
 
