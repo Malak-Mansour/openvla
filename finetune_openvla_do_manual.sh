@@ -5,6 +5,7 @@
 #SBATCH --partition=cscc-gpu-p
 #SBATCH --qos=cscc-gpu-qos        
 #SBATCH --gres=gpu:1
+#SBATCH --nodelist=gpu-06             # 🚨 Use idle node
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=48:00:00
@@ -18,11 +19,7 @@ conda activate openvla
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --vla_path "openvla/openvla-7b" \
   --data_root_dir /l/users/malak.mansour/Datasets/do_manual/rlds \
-  
-  --dataset_name do_manual_delta \
-  # --dataset_name do_manual_teleop \
-  # --dataset_name do_manual_next \
-
+  --dataset_name do_manual \
   --run_root_dir /l/users/malak.mansour/OpenVLA/runs/do_manual \
   --adapter_tmp_dir /l/users/malak.mansour/OpenVLA/adapters/tmp_do_manual \
   --lora_rank 32 \
@@ -35,7 +32,6 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --wandb_project openvla-do_manual
 
 
-'''
-launch with 
-        sbatch deltafinetune_openvla_do_manual.sh
-'''
+
+# launch with 
+#         sbatch finetune_openvla_do_manual.sh
