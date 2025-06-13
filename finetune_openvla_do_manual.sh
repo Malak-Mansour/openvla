@@ -12,7 +12,7 @@
 
 
 source ~/.bashrc
-cd ~/Downloads/ICL/openvla
+cd ~/ICL/openvla
 conda activate openvla
 
 
@@ -34,4 +34,5 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 
 
 # launch with 
+#         bash finetune_openvla_do_manual.sh
 #         sbatch finetune_openvla_do_manual.sh

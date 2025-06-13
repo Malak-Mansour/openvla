@@ -997,7 +997,7 @@ OXE_STANDARDIZATION_TRANSFORMS = {
     "libero_object_no_noops": libero_dataset_transform,
     "libero_goal_no_noops": libero_dataset_transform,
     "libero_10_no_noops": libero_dataset_transform,
-    # "do_manual": do_dataset_transform_delta,
-    "do_manual": do_dataset_transform_teleop,
+    "do_manual": do_dataset_transform_delta,
+    # "do_manual": do_dataset_transform_teleop,
     # "do_manual": do_dataset_transform_next,
 }

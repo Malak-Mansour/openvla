@@ -21,6 +21,7 @@ overwatch = initialize_overwatch(__name__)
 def make_oxe_dataset_kwargs(
     dataset_name: str,
     data_root_dir: Path,
+    # load_camera_views: Tuple[str] = ("primary","wrist",),
     load_camera_views: Tuple[str] = ("primary",),
     load_depth: bool = False,
     load_proprio: bool = True,
@@ -29,6 +30,9 @@ def make_oxe_dataset_kwargs(
 ) -> Dict[str, Any]:
     """Generates config (kwargs) for given dataset from Open-X Embodiment."""
     dataset_kwargs = deepcopy(OXE_DATASET_CONFIGS[dataset_name])
+
+    print(f"\n[make_oxe_dataset_kwargs] Initial image_obs_keys for `{dataset_name}`: {list(dataset_kwargs['image_obs_keys'].keys())}")
+
     if dataset_kwargs["action_encoding"] not in [ActionEncoding.EEF_POS, ActionEncoding.EEF_R6]:
         raise ValueError(f"Cannot load `{dataset_name}`; only EEF_POS & EEF_R6 actions supported!")
 
@@ -53,6 +57,9 @@ def make_oxe_dataset_kwargs(
     dataset_kwargs["depth_obs_keys"] = {
         k: v for k, v in dataset_kwargs["depth_obs_keys"].items() if k in load_camera_views
     }
+
+    print(f"[make_oxe_dataset_kwargs] Filtered image_obs_keys for `{dataset_name}`: {list(dataset_kwargs['image_obs_keys'].keys())}")
+
 
     # Eliminate Unnecessary Keys
     dataset_kwargs.pop("state_encoding")
@@ -79,6 +86,7 @@ def make_oxe_dataset_kwargs(
 def get_oxe_dataset_kwargs_and_weights(
     data_root_dir: Path,
     mixture_spec: List[Tuple[str, float]],
+    # load_camera_views: Tuple[str] = ("primary","wrist",),
     load_camera_views: Tuple[str] = ("primary",),
     load_depth: bool = False,
     load_proprio: bool = True,
@@ -112,17 +120,19 @@ def get_oxe_dataset_kwargs_and_weights(
     per_dataset_kwargs, sampling_weights = [], []
     for d_name, d_weight in filtered_mixture_spec:
         try:
-            per_dataset_kwargs.append(
-                make_oxe_dataset_kwargs(
-                    d_name,
-                    data_root_dir,
-                    load_camera_views,
-                    load_depth,
-                    load_proprio,
-                    load_language,
-                    action_proprio_normalization_type,
-                )
+            print(f"\n[get_oxe_dataset_kwargs_and_weights] Processing dataset: `{d_name}` with weight {d_weight}")
+
+            kwargs = make_oxe_dataset_kwargs(
+                d_name,
+                data_root_dir,
+                load_camera_views,
+                load_depth,
+                load_proprio,
+                load_language,
+                action_proprio_normalization_type,
             )
+            print(f"[get_oxe_dataset_kwargs_and_weights] Final image_obs_keys for `{d_name}`: {list(kwargs['image_obs_keys'].keys())}")
+            per_dataset_kwargs.append(kwargs)
             sampling_weights.append(d_weight)
 
         except ValueError as e:

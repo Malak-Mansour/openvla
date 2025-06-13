@@ -154,7 +154,7 @@ def finetune(cfg: FinetuneConfig) -> None:
 
     # Configure Unique Experiment ID & Log Directory
     exp_id = (
-        f"{cfg.vla_path.split('/')[-1]}+{cfg.dataset_name}_teleop"
+        f"{cfg.vla_path.split('/')[-1]}+{cfg.dataset_name}_delta_2imgs_TEST_PRINT"
         f"+b{cfg.batch_size * cfg.grad_accumulation_steps}"
         f"+lr-{cfg.learning_rate}"
     )
@@ -283,6 +283,32 @@ def finetune(cfg: FinetuneConfig) -> None:
         vla.train()
         optimizer.zero_grad()
         for batch_idx, batch in enumerate(dataloader):
+
+            # DEBUG: Inspect what's inside the batch
+            if batch_idx == 0:  # Or use any condition you like
+                print("Batch keys:", batch.keys())
+                print("Input IDs shape:", batch["input_ids"].shape)
+                print("Pixel values shape:", batch["pixel_values"].shape)
+                
+                # Save the first image in the batch for inspection
+                img_tensor = batch["pixel_values"][0]  # Shape: (3, H, W), assume it's normalized
+
+                from torchvision.utils import save_image
+                from pathlib import Path
+
+                save_dir = Path("debug_images")
+                save_dir.mkdir(exist_ok=True)
+                
+                # Assume first 3 channels = primary view, next 3 = wrist view
+                img_primary = (img_tensor[:3] + 1) / 2
+                img_wrist = (img_tensor[3:] + 1) / 2
+
+                save_image(img_primary, save_dir / f"batch{batch_idx}_img0_primary.png")
+                save_image(img_wrist, save_dir / f"batch{batch_idx}_img0_wrist.png")
+
+                print(f"Saved image: {save_dir / f'batch{batch_idx}_img0.png'}")
+
+
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 output: CausalLMOutputWithPast = vla(
                     input_ids=batch["input_ids"].to(device_id),
